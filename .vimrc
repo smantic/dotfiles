@@ -4,9 +4,12 @@ set shiftwidth=4
 set expandtab
 set number	
 set nocompatible 
+set noerrorbells
 
 filetype plugin indent on
+colo 1
 highlight LineNr ctermfg=darkgrey
+
 
 " searching 
 set hlsearch 
@@ -21,8 +24,7 @@ if empty(glob("~/.vim/autoload/plug.vim"))
 endif
 
 " Plugins will be downloaded under the specified directory.
-call plug#begin('~/.vim/bundle')
-		
+call plug#begin()
         Plug 'tpope/vim-sensible'
 		Plug 'https://github.com/scrooloose/nerdtree'
 		Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }	
@@ -34,8 +36,17 @@ call plug#begin('~/.vim/bundle')
         Plug 'peitalin/vim-jsx-typescript'
         Plug 'elixir-editors/vim-elixir'
         Plug 'tomlion/vim-solidity'
-
+        Plug 'mrk21/yaml-vim'
+        Plug 'nvim-lua/plenary.nvim'
+        Plug 'nvim-telescope/telescope.nvim', {'tag': '0.1.2'}
+        Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+        Plug 'slugbyte/lackluster.nvim'
 call plug#end()
+
+nnoremap <leader>ff <cmd>Telescope find_files<cr> 
+nnoremap <leader>f <cmd>Telescope live_grep<cr> 
+nnoremap <leader>fg <cmd>Telescope git_files<cr> 
+
 
 " set filetypes as typescriptreact
 autocmd BufNewFile,BufRead *.tsx,*.jsx set filetype=typescriptreact
@@ -73,9 +84,28 @@ autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 map <C-n> :cnext<CR>
 map <C-m> :cprevious<CR>
 nnoremap <leader>a :cclose<CR>
+map <leader>n :bnext<cr>
+map <leader>p :bprevious<cr>
+map <leader>d :bdelete<cr>
 
 
 "  :AV open test file in vsp 
 autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
 " :AS open test file in sp
 autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+
+lua << EOF
+    local lsp = require('lspconfig')
+    require('nvim-treesitter.configs').setup {
+        -- Modules and its options go here
+        highlight = { enable = true },
+        incremental_selection = { enable = true },
+        textobjects = { enable = true },
+    }
+
+    lsp.gleam.setup({})
+EOF
+
+autocmd FileType gleam LspStart gleam 
+autocmd BufWritePre *.gleam lua vim.lsp.buf.format({ async = false })
+autocmd FileType gleam nmap <leader>c <cmd>lua vim.lsp.buf.code_action()<CR> 
