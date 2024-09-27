@@ -41,6 +41,7 @@ call plug#begin()
         Plug 'nvim-telescope/telescope.nvim', {'tag': '0.1.2'}
         Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
         Plug 'slugbyte/lackluster.nvim'
+        Plug 'frankroeder/parrot.nvim'
 call plug#end()
 
 nnoremap <leader>ff <cmd>Telescope find_files<cr> 
@@ -84,9 +85,14 @@ autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 map <C-n> :cnext<CR>
 map <C-m> :cprevious<CR>
 nnoremap <leader>a :cclose<CR>
-map <leader>n :bnext<cr>
-map <leader>p :bprevious<cr>
-map <leader>d :bdelete<cr>
+map <leader>n :bnext<CR>
+map <leader>p :bprevious<CR>
+map <leader>d :bdelete<CR>
+
+" parrot 
+map <leader>cn :PrtChatNew vsplit<CR> 
+map <leader>c :PrtChatToggle vsplit <CR> 
+map <leader>cr :PrtChatResponde <CR> 
 
 
 "  :AV open test file in vsp 
@@ -95,7 +101,6 @@ autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit'
 autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
 
 lua << EOF
-    local lsp = require('lspconfig')
     require('nvim-treesitter.configs').setup {
         -- Modules and its options go here
         highlight = { enable = true },
@@ -103,9 +108,42 @@ lua << EOF
         textobjects = { enable = true },
     }
 
+    local lsp = require('lspconfig')
+
     lsp.gleam.setup({})
+    lspconfig.gopls.setup {
+      on_attach = on_attach,
+      capabilities = capabilities,
+      cmd = {"gopls"},
+      filetypes = { "go", "gomod", "gowork", "gotmpl" },
+      root_dir = util.root_pattern("go.work", "go.mod", ".git"),
+      settings = {
+        gopls = {
+          completeUnimported = true
+          usePlaceholders = true,
+          analyses = {
+            unusedparams = true,
+          },
+        },
+      },
+    }
+
+    lspconfig.gdscript.setup({})
+
+    require("parrot").setup({
+     chat_user_prefix = ">",
+     llm_prefix = "llm>",
+     toggle_target = "vsplit",
+      providers = {
+        anthropic = {
+          api_key = os.getenv "ANTHROPIC_API_KEY",
+        },
+      }
+    })
 EOF
 
 autocmd FileType gleam LspStart gleam 
 autocmd BufWritePre *.gleam lua vim.lsp.buf.format({ async = false })
-autocmd FileType gleam nmap <leader>c <cmd>lua vim.lsp.buf.code_action()<CR> 
+autocmd FileType gleam nmap <leader>ca <cmd>lua vim.lsp.buf.code_action()<CR> 
+
+let g:gdot_executable = '/mnt/c\Users\tyler\Downloads\Godot_v4.2.1-stable_win64.exe'
