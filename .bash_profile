@@ -10,11 +10,13 @@ export BASH_SILENCE_DEPRECATION_WARNING=1
 # Autocorrect typos in path names when using `cd`
 shopt -s cdspell;
 
+
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
     xterm-color|*-256color) color_prompt=yes;;
 esac
 
+export COLORTERM=truecolor
 export CLICOLOR=1;
 export LSCOLORS=GxBxCxDxexegedabagaced;
 

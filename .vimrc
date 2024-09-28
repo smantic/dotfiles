@@ -4,18 +4,11 @@ set shiftwidth=4
 set expandtab
 set number	
 set nocompatible 
-set noerrorbells
-
-filetype plugin indent on
-colo 1
-highlight LineNr ctermfg=darkgrey
-
-
-" searching 
 set hlsearch 
 set incsearch 
-
 set noerrorbells
+set termguicolors 
+filetype plugin indent on
 
 " download vim-plug if missing
 if empty(glob("~/.vim/autoload/plug.vim"))
@@ -42,6 +35,7 @@ call plug#begin()
         Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
         Plug 'slugbyte/lackluster.nvim'
         Plug 'frankroeder/parrot.nvim'
+        Plug 'habamax/vim-godot'
 call plug#end()
 
 nnoremap <leader>ff <cmd>Telescope find_files<cr> 
@@ -111,24 +105,18 @@ lua << EOF
     local lsp = require('lspconfig')
 
     lsp.gleam.setup({})
-    lspconfig.gopls.setup {
-      on_attach = on_attach,
-      capabilities = capabilities,
-      cmd = {"gopls"},
-      filetypes = { "go", "gomod", "gowork", "gotmpl" },
-      root_dir = util.root_pattern("go.work", "go.mod", ".git"),
+
+    lsp.gopls.setup({
       settings = {
         gopls = {
-          completeUnimported = true
-          usePlaceholders = true,
+          completeUnimported = true,
+          staticcheck = true,  
           analyses = {
             unusedparams = true,
           },
         },
       },
-    }
-
-    lspconfig.gdscript.setup({})
+    })
 
     require("parrot").setup({
      chat_user_prefix = ">",
@@ -146,4 +134,4 @@ autocmd FileType gleam LspStart gleam
 autocmd BufWritePre *.gleam lua vim.lsp.buf.format({ async = false })
 autocmd FileType gleam nmap <leader>ca <cmd>lua vim.lsp.buf.code_action()<CR> 
 
-let g:gdot_executable = '/mnt/c\Users\tyler\Downloads\Godot_v4.2.1-stable_win64.exe'
+let g:gdot_executable = '/mnt/c/Users/tyler/godot.exe'
