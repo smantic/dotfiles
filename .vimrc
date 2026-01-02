@@ -11,8 +11,8 @@ set termguicolors
 filetype plugin indent on
 
 " download vim-plug if missing
-if empty(glob("~/.vim/autoload/plug.vim"))
-  silent! execute '!curl --create-dirs -fsSLo ~/.vim/autoload/plug.vim https://raw.github.com/junegunn/vim-plug/master/plug.vim'
+if empty(glob("${XDG_DATA_HOME:-$HOME/.local/share}"))
+  silent! execute '!curl --create-dirs -fsSLo ${XDG_DATA_HOME:-$HOME/.local/share} https://raw.github.com/junegunn/vim-plug/master/plug.vim'
   autocmd VimEnter * silent! PlugInstall
 endif
 
@@ -83,12 +83,6 @@ map <leader>n :bnext<CR>
 map <leader>p :bprevious<CR>
 map <leader>d :bdelete<CR>
 
-" parrot 
-map <leader>cn :PrtChatNew vsplit<CR> 
-map <leader>c :PrtChatToggle vsplit <CR> 
-map <leader>cr :PrtChatResponde <CR> 
-
-
 "  :AV open test file in vsp 
 autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
 " :AS open test file in sp
@@ -104,8 +98,6 @@ lua << EOF
 
     local lsp = require('lspconfig')
 
-    lsp.gleam.setup({})
-
     lsp.gopls.setup({
       settings = {
         gopls = {
@@ -117,21 +109,4 @@ lua << EOF
         },
       },
     })
-
-    require("parrot").setup({
-     chat_user_prefix = ">",
-     llm_prefix = "llm>",
-     toggle_target = "vsplit",
-      providers = {
-        anthropic = {
-          api_key = os.getenv "ANTHROPIC_API_KEY",
-        },
-      }
-    })
 EOF
-
-autocmd FileType gleam LspStart gleam 
-autocmd BufWritePre *.gleam lua vim.lsp.buf.format({ async = false })
-autocmd FileType gleam nmap <leader>ca <cmd>lua vim.lsp.buf.code_action()<CR> 
-
-let g:gdot_executable = '/mnt/c/Users/tyler/godot.exe'
