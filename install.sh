@@ -16,3 +16,5 @@ cp colo1.vim ~/nvim/colors/1.vim
 mkdir -p ~/nvim/pack/nvim/start/nvim-lspconfig
 git clone https://github.com/neovim/nvim-lspconfig ~/nvim/pack/nvim/start/nvim-lspconfig
 curl -fsSL https://claude.ai/install.sh | bash
+sudo apt install dconf-cli
+bash ./kasugano.sh 

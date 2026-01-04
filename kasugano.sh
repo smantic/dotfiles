@@ -36,42 +36,41 @@ dlist_append() {
 if which "$DCONF" > /dev/null 2>&1; then
     [[ -z "$BASE_KEY_NEW" ]] && BASE_KEY_NEW=/org/gnome/terminal/legacy/profiles:
 
-    if [[ -n "`$DCONF list $BASE_KEY_NEW/`" ]]; then
-        if which "$UUIDGEN" > /dev/null 2>&1; then
-            PROFILE_SLUG=`uuidgen`
-        fi
+    if which "$UUIDGEN" > /dev/null 2>&1; then
+        PROFILE_SLUG=`uuidgen`
+    fi
 
+    PROFILE_KEY="$BASE_KEY_NEW/:$PROFILE_SLUG"
+
+    # copy existing settings from default profile if one exists
+    if [[ -n "`$DCONF list $BASE_KEY_NEW/`" ]]; then
         if [[ -n "`$DCONF read $BASE_KEY_NEW/default`" ]]; then
             DEFAULT_SLUG=`$DCONF read $BASE_KEY_NEW/default | tr -d \'`
         else
             DEFAULT_SLUG=`$DCONF list $BASE_KEY_NEW/ | grep '^:' | head -n1 | tr -d :/`
         fi
-
         DEFAULT_KEY="$BASE_KEY_NEW/:$DEFAULT_SLUG"
-        PROFILE_KEY="$BASE_KEY_NEW/:$PROFILE_SLUG"
-
-        # copy existing settings from default profile
         $DCONF dump "$DEFAULT_KEY/" | $DCONF load "$PROFILE_KEY/"
-
-        # add new copy to list of profiles
-        dlist_append $BASE_KEY_NEW/list "$PROFILE_SLUG"
-
-        # update profile values with theme options
-        dset visible-name "'$PROFILE_NAME'"
-        dset palette "['#3d3d3d', '#6673bf', '#3ea290', '#b0ead9', '#31658c', '#596196', '#8292b2', '#c8cacc', '#4d4d4d', '#899aff', '#52ad91', '#98c9bb', '#477ab3', '#7882bf', '#95a7cc', '#edeff2']"
-        dset background-color "'#1b1b1b'"
-        dset foreground-color "'#ffffff'"
-        dset bold-color "'#ffffff'"
-        dset bold-color-same-as-fg "true"
-        dset use-theme-colors "false"
-        dset use-theme-background "false"
-
-        unset PROFILE_NAME
-        unset PROFILE_SLUG
-        unset DCONF
-        unset UUIDGEN
-        exit 0
     fi
+
+    # add new copy to list of profiles
+    dlist_append $BASE_KEY_NEW/list "$PROFILE_SLUG"
+
+    # update profile values with theme options
+    dset visible-name "'$PROFILE_NAME'"
+    dset palette "['#3d3d3d', '#6673bf', '#3ea290', '#b0ead9', '#31658c', '#596196', '#8292b2', '#c8cacc', '#4d4d4d', '#899aff', '#52ad91', '#98c9bb', '#477ab3', '#7882bf', '#95a7cc', '#edeff2']"
+    dset background-color "'#1b1b1b'"
+    dset foreground-color "'#ffffff'"
+    dset bold-color "'#ffffff'"
+    dset bold-color-same-as-fg "true"
+    dset use-theme-colors "false"
+    dset use-theme-background "false"
+
+    unset PROFILE_NAME
+    unset PROFILE_SLUG
+    unset DCONF
+    unset UUIDGEN
+    exit 0
 fi
 
 # Fallback for Gnome 2 and early Gnome 3

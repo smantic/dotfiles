@@ -112,6 +112,7 @@ export PATH="$PATH:/home/$USER/.cargo/bin"
 export PATH="$PATH:/home/$USER/zig/"
 export PATH="$PATH:/home/$USER/.local/bin"
 export XDG_CONFIG_HOME=/home/$USER
+export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
 
 eval "$(direnv hook bash)"
 
@@ -127,3 +128,36 @@ coverage() {
 
 git config --global core.editor "vim"
 
+source <(kubectl completion bash)
+source ~/.secrets
+
+worktree(){ 
+  local current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+  # Check if we're in a git repository
+  if [ $? -ne 0 ]; then
+      echo "Error: Not in a git repository"
+      return 1
+  fi
+
+  local dir_name=$(echo "$current_branch" | cut -d'/' -f2- | tr '/' '_' | cut -d '-' -f1-2)
+
+  if [ -d "$dir_name" ]; then
+      cd "$dir_name"
+      return 0
+  fi
+
+  git checkout master 
+
+  # Create worktree
+  echo "Creating worktree for branch '$current_branch' in directory '~/$dir_name'"
+  git worktree add ~/"$dir_name" "$current_branch"
+
+  # Change into the new worktree directory
+  if [ $? -eq 0 ]; then
+      cd ~/"$dir_name"
+  else
+      echo "Error: Failed to create worktree"
+      return 1
+  fi
+}
